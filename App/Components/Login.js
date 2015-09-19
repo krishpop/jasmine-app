@@ -40,8 +40,10 @@ var Login = React.createClass({
               if (result.isCanceled) {
                 alert('Login cancelled.');
               } else {
-                FBSDKAccessToken(result.grantedPermissions)
-                alert('Logged in.');
+                this.props.setUser();
+                FBSDKAccessToken.getCurrentAccessToken((token) => {
+                  console.log(token.tokenString);
+                })
               }
             }
           }}

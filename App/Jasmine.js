@@ -19,6 +19,7 @@ var FBSDKCore = require('react-native-fbsdkcore');
 
 var {
   FBSDKGraphRequest,
+  FBSDKGraphRequestManager
 } = FBSDKCore;
 
 var Login = require('./Components/Login')
@@ -27,7 +28,8 @@ var Login = require('./Components/Login')
 var Jasmine = React.createClass({
   getInitialState() {
     return {
-      loggedIn: false
+      loggedIn: false,
+      photos: []
     }
   },
 
@@ -40,18 +42,32 @@ var Jasmine = React.createClass({
       // Create a graph request asking for friends with a callback to handle the response.
       var fetchHomeRequest = new FBSDKGraphRequest((error, result) => {
         if (error) {
-          alert('Error making request.');
+          alert(error.message);
         } else {
           console.log(result);
         }
       }, '/me/home');
-      fetchHomeRequest.start();
+      FBSDKGraphRequestManager.batchRequests([fetchHomeRequest], function() {}, 60);
     }
     return (
       <View style={styles.container}>
         { !this.state.loggedIn &&  <Login setUser={this._setUser}/> }
       </View>
     );
+  },
+
+  _handleRequest(error, result) {
+    if (!error) {
+      var photos = result.data;
+      var renderedPhotos = [];
+      for (var i = 0, il = photos.length; i < il; i++) {
+        var photo = photos[i];
+        if (photo.images && photo.images.length > 0) {
+          renderedPhotos.push(this._renderPhoto(photo.images[0]));
+        }
+      }
+      this.setState({ photos: renderedPhotos });
+    }
   }
 });
 
