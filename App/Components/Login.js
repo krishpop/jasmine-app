@@ -48,7 +48,7 @@ var Login = React.createClass({
             }
           }}
           onLogoutFinished={() => alert('Logged out.')}
-          readPermissions={["email", "user_friends", "user_posts", "user_status", "user_friends"]}
+          readPermissions={["email", "user_friends", "user_posts", "user_status", "user_friends", "read_custom_friendlists"]}
           />
       </View>
     );

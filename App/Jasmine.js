@@ -22,7 +22,8 @@ var {
   FBSDKGraphRequestManager
 } = FBSDKCore;
 
-var Login = require('./Components/Login')
+var _ = require('lodash');
+var Login = require('./Components/Login');
 
 
 var Jasmine = React.createClass({
@@ -40,34 +41,31 @@ var Jasmine = React.createClass({
   render() {
     if (this.state.loggedIn) {
       // Create a graph request asking for friends with a callback to handle the response.
-      var fetchHomeRequest = new FBSDKGraphRequest((error, result) => {
-        if (error) {
-          alert(error.message);
-        } else {
-          console.log(result);
-        }
-      }, '/me/home');
-      FBSDKGraphRequestManager.batchRequests([fetchHomeRequest], function() {}, 60);
+      var fetchCloseFriends = new FBSDKGraphRequest((error, result) => {
+                    if (error) {
+                      alert(error.message);
+                    } else {
+                      // Custom friends: 283894981621420
+                      this._handleRequest(result);
+                    }
+                  }, '/me?fields=friends{name,context}'); // ?fields=name,list_type
+
+      FBSDKGraphRequestManager.batchRequests([fetchCloseFriends], () => {}, 60);
     }
     return (
       <View style={styles.container}>
         { !this.state.loggedIn &&  <Login setUser={this._setUser}/> }
       </View>
     );
-  },
+  }, 
 
-  _handleRequest(error, result) {
-    if (!error) {
-      var photos = result.data;
-      var renderedPhotos = [];
-      for (var i = 0, il = photos.length; i < il; i++) {
-        var photo = photos[i];
-        if (photo.images && photo.images.length > 0) {
-          renderedPhotos.push(this._renderPhoto(photo.images[0]));
-        }
-      }
-      this.setState({ photos: renderedPhotos });
-    }
+  _handleRequest(result) {
+    var friendLists = result.data;
+    friendListIDs = _.pluck(friendLists, 'id');
+    friendListIDs.join(', ');
+    // _.result(_.find(friendlists, function(list) {
+    //   return list.list_type == "close_friends";
+    // }), 'id');
   }
 });
 
