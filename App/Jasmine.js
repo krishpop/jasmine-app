@@ -2,40 +2,74 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 04:44:11
+* Last Modified time: 2015-09-19 14:43:21
 */
 'use strict';
 
 var React = require('react-native');
 
 var {
+  AsyncStorage,
   Text,
   StyleSheet,
   View
 } = React;
+ 
+var FBSDKCore = require('react-native-fbsdkcore');
 
-// var { TabBarIOS, } = require('react-native-icons');
-// var TabBarItemIOS = TabBarIOS.Item;
-var Login = require('./Pages/ProfilePage')
+var {
+  FBSDKGraphRequest,
+  FBSDKGraphRequestManager
+} = FBSDKCore;
+
+var Login = require('./Components/Login')
+var Card = require('./Components/Card');
+var HorizontalList = require('./Components/HorizontalList');
+
 
 var Jasmine = React.createClass({
-  render: function() {
+  getInitialState() {
+    return {
+      loggedIn: false,
+      photos: []
+    }
+  },
+
+  _setUser() {
+    this.setState({loggedIn: true});
+  },
+
+  render() {
+    if (this.state.loggedIn) {
+      // Create a graph request asking for friends with a callback to handle the response.
+      var fetchHomeRequest = new FBSDKGraphRequest((error, result) => {
+        if (error) {
+          alert(error.message);
+        } else {
+          console.log(result);
+        }
+      }, '/me/home');
+      FBSDKGraphRequestManager.batchRequests([fetchHomeRequest], function() {}, 60);
+    }
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!{'\n'}
-        </Text>
-        <Login/>
-        <Text>{'\n'}</Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+D or shake for dev menu
-        </Text>
+      <View>
+        <HorizontalList/>
       </View>
     );
+  },
+
+  _handleRequest(error, result) {
+    if (!error) {
+      var photos = result.data;
+      var renderedPhotos = [];
+      for (var i = 0, il = photos.length; i < il; i++) {
+        var photo = photos[i];
+        if (photo.images && photo.images.length > 0) {
+          renderedPhotos.push(this._renderPhoto(photo.images[0]));
+        }
+      }
+      this.setState({ photos: renderedPhotos });
+    }
   }
 });
 
@@ -45,17 +79,7 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  }
 });
 
 module.exports = Jasmine;

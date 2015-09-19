@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 04:48:45
+* Last Modified time: 2015-09-19 14:46:55
 */
 'use strict';
 
@@ -16,6 +16,12 @@ var {
   StyleSheet,
   View
 } = React;
+
+var FBSDKCore = require('react-native-fbsdkcore');
+
+var {
+  FBSDKAccessToken,
+} = FBSDKCore;
 
 var FBSDKLogin = require('react-native-fbsdklogin');
 
@@ -32,27 +38,7 @@ var {
 
 var Login = React.createClass({
 
-  parseInit: function () { 
-    var user = ParseReact.Mutation.Create('User', {
-      userId: '123'
-    });
-
-    user.dispatch();
-  },
-
-  fetchFriendsRequest: function() {
-    var fetchFriends = new FBSDKGraphRequest((error, result) => {
-      if (error) {
-        alert('Error making request.');
-      } else {
-        console.log(result);
-      }
-    }, '/me/friends');
-    fetchFriends.start();
-  },
-  // Start the graph request.
   render: function() {
-    this.parseInit();
     return (
       <View>
         <FBSDKLoginButton
@@ -63,14 +49,15 @@ var Login = React.createClass({
               if (result.isCanceled) {
                 alert('Login cancelled.');
               } else {
-                fetchFriendsRequest();
-                alert('Logged in.');
+                this.props.setUser();
+                FBSDKAccessToken.getCurrentAccessToken((token) => {
+                  console.log(token.tokenString);
+                })
               }
             }
           }}
           onLogoutFinished={() => alert('Logged out.')}
-          readPermissions={["email", "user_friends"]}
-
+          readPermissions={["email", "user_friends", "user_posts", "user_status", "user_friends"]}
           />
       </View>
     );
