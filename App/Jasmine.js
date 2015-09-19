@@ -15,7 +15,14 @@ var {
   View
 } = React;
  
+var FBSDKCore = require('react-native-fbsdkcore');
+
+var {
+  FBSDKGraphRequest,
+} = FBSDKCore;
+
 var Login = require('./Pages/ProfilePage')
+
 
 var Jasmine = React.createClass({
   getInitialState() {
@@ -29,6 +36,17 @@ var Jasmine = React.createClass({
   },
 
   render() {
+    if (this.state.loggedIn) {
+      // Create a graph request asking for friends with a callback to handle the response.
+      var fetchHomeRequest = new FBSDKGraphRequest((error, result) => {
+        if (error) {
+          alert('Error making request.');
+        } else {
+          console.log(result);
+        }
+      }, '/me/home');
+      fetchHomeRequest.start();
+    }
     return (
       <View style={styles.container}>
         { !this.state.loggedIn &&  <Login setUser={this._setUser}/> }
