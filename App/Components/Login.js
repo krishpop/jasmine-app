@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 17:59:42
+* Last Modified time: 2015-09-19 18:41:34
 */
 'use strict';
 
@@ -40,13 +40,15 @@ var Login = React.createClass({
               if (result.isCanceled) {
                 alert('Login cancelled.');
               } else {
-                FBSDKAccessToken(result.grantedPermissions)
-                alert('Logged in.');
+                this.props.setUser();
+                FBSDKAccessToken.getCurrentAccessToken((token) => {
+                  console.log(token.tokenString);
+                })
               }
             }
           }}
           onLogoutFinished={() => alert('Logged out.')}
-          readPermissions={["email", "user_friends", "user_posts", "user_status", "user_friends", "read_stream"]}
+          readPermissions={["email", "user_posts", "user_status", "user_friends", "user_photos"]}
           />
       </View>
     );
