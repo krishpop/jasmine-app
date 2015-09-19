@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 14:46:55
+* Last Modified time: 2015-09-19 17:59:42
 */
 'use strict';
 
@@ -46,7 +46,7 @@ var Login = React.createClass({
             }
           }}
           onLogoutFinished={() => alert('Logged out.')}
-          readPermissions={["email", "user_friends", "user_posts", "user_status", "user_friends"]}
+          readPermissions={["email", "user_friends", "user_posts", "user_status", "user_friends", "read_stream"]}
           />
       </View>
     );
