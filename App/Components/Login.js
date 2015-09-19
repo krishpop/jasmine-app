@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 14:22:10
+* Last Modified time: 2015-09-19 14:46:55
 */
 'use strict';
 
@@ -14,11 +14,18 @@ var {
   View
 } = React;
 
+var FBSDKCore = require('react-native-fbsdkcore');
+
+var {
+  FBSDKAccessToken,
+} = FBSDKCore;
+
 var FBSDKLogin = require('react-native-fbsdklogin');
 
 var {
   FBSDKLoginButton,
 } = FBSDKLogin;
+
 
 var Login = React.createClass({
 
@@ -33,7 +40,7 @@ var Login = React.createClass({
               if (result.isCanceled) {
                 alert('Login cancelled.');
               } else {
-                this.props.setUser();
+                FBSDKAccessToken(result.grantedPermissions)
                 alert('Logged in.');
               }
             }

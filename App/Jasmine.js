@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 14:24:55
+* Last Modified time: 2015-09-19 14:43:21
 */
 'use strict';
 
@@ -21,7 +21,7 @@ var {
   FBSDKGraphRequest,
 } = FBSDKCore;
 
-var Login = require('./Pages/ProfilePage')
+var Login = require('./Components/Login')
 
 
 var Jasmine = React.createClass({
