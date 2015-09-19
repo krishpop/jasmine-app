@@ -1,0 +1,14 @@
+{
+  "name": "Jasmine",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node_modules/react-native/packager/packager.sh"
+  },
+  "dependencies": {
+    "react-native": "^0.11.0",
+    "react-native-fbsdkcore": "0.0.5",
+    "react-native-fbsdklogin": "0.0.5",
+    "react-native-fbsdkshare": "0.0.5"
+  }
+}
