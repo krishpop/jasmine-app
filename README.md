@@ -18,6 +18,6 @@
   - [push notifications](https://github.com/darylrowland/react-native-remote-push)
   - [rn FBLogin](https://github.com/magus/react-native-facebook-login/)
 
-#### Design Files
+#### design files
 - sketch/invision app assets
   - wireframes, buttons, background images, etc.
