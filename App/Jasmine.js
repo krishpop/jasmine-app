@@ -46,7 +46,7 @@ var Jasmine = React.createClass({
         if (error) {
           alert(error.message);
         } else {
-          console.log(result);
+          //console.log(result);
         }
       }, '/me/home');
       FBSDKGraphRequestManager.batchRequests([fetchHomeRequest], function() {}, 60);

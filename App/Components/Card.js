@@ -34,36 +34,42 @@ var Card = React.createClass({
 
 	    user.dispatch();
   	},
+	getInitialState: function() {
+	    return {
+	      y: 400,
+	    }
+	},
+	resetPosition: function(e) {
+		console.log('reseting')
+	    var left = e.nativeEvent.pageX < (windowSize.width/2);
+	    this.setState({
+	      y: 300
+	    })
+	 },
 	setPosition: function(e) {
+		console.log('~~~~~~~~~~~~~~~~~~~~~~~~~setting position!!!!!!!!!!!!!!!!!!!!!!!!')
     	this.setState({
-    	  x: this.state.x + (e.nativeEvent.pageX - this.drag.x),
     	  y: this.state.y + (e.nativeEvent.pageY - this.drag.y)
     	});
-    	this.drag.x = e.nativeEvent.pageX;
     	this.drag.y = e.nativeEvent.pageY;
 	},
 	_onStartShouldSetResponder: function(e) {
+		console.log('!!!!!!!!!!!!!')
 		this.dragging = true;
  		this.drag = {
  			y: e.nativeEvent.pageY
  		}
- 		   return true;
+		console.log(this.drag)
+ 		return true;
  	},
 	render: function() {
 		return (
-			<View>
-				<Text> Push to Parse </Text>
-				<TouchableHighlight 
-					onPress={this.pushToParse} 
-					style={styles.card} 
-					onResponderMove={this.setPosition}
-            		onResponderRelease={this.}
-            		onStartShouldSetResponder={this._onStartShouldSetResponder}>
-					<View>
-						<Text>{this.props.text}</Text>
-						<Text>{this.props.user}</Text>
-					</View>
-				</TouchableHighlight>
+			<View onResponderMove={this.setPosition}
+            		onResponderRelease={this.resetPosition}
+					onMoveShouldSetResponder={this._onStartShouldSetResponder}
+					style={styles.card}>
+					<Text>{this.props.text}</Text>
+				    <Text>{this.props.user}</Text>
 			</View>
 		)
 	}

@@ -51,7 +51,7 @@ var Login = React.createClass({
               } else {
                 this.props.setUser();
                 FBSDKAccessToken.getCurrentAccessToken((token) => {
-                  console.log(token.tokenString);
+                  // console.log(token.tokenString);
                 })
               }
             }

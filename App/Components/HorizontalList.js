@@ -1,5 +1,6 @@
 var React = require('react-native');
 var Card = require('./Card');
+var Dimensions = require('Dimensions');
 
 var {
   Text,
@@ -8,6 +9,17 @@ var {
   TouchableHighlight,
   ScrollView
 } = React;
+
+var {
+  height
+} = Dimensions.get('window');
+
+var styles = StyleSheet.create({
+    container: {
+   		 height: height,
+   		 padding: 0, 
+ 	}
+});
 
 var HorizontalList = React.createClass({ 
 	getInitialState: function () { 
@@ -30,9 +42,8 @@ var HorizontalList = React.createClass({
 			console.log('card')
 			return <Card user={post.user} text={post.text} key={index}/>
 		})
-		console.log(Cards)
 		return (
-			<View> 
+			<View style={styles.container}> 
 				<ScrollView horizontal={true} directionalLockEnabled={true}>
 					{Cards}
 				</ScrollView>
