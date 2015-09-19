@@ -16,4 +16,4 @@
 - [Grab News Feed](https://developers.facebook.com/docs/graph-api/reference/v2.4/user/home)
 - [Get likes and Post likes](https://developers.facebook.com/docs/graph-api/reference/v2.4/object/likes)
 - [Node Parse API](https://github.com/Leveton/node-parse-api)
-
+- [integrate Parse and rn](http://www.raywenderlich.com/106369/integrating-parse-react-native-ios)
