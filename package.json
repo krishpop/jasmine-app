@@ -7,9 +7,12 @@
   },
   "dependencies": {
     "lodash": "^3.10.1",
+    "parse": "^1.6.3",
+    "parse-react": "^0.5.0",
     "react-native": "^0.11.0",
     "react-native-fbsdkcore": "0.0.5",
     "react-native-fbsdklogin": "0.0.5",
-    "react-native-fbsdkshare": "0.0.5"
+    "react-native-fbsdkshare": "0.0.5",
+    "react-timer-mixin": "^0.13.3"
   }
 }

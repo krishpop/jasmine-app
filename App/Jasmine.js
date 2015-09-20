@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 19:03:33
+* Last Modified time: 2015-09-19 21:48:38
 */
 'use strict';
 
@@ -23,15 +23,27 @@ var {
 } = FBSDKCore;
 
 var _ = require('lodash');
+var Parse = require('parse').Parse;
+var ParseReact = require('parse-react');
+var TimerMixin = require('react-timer-mixin');
 var Login = require('./Components/Login');
 
-
 var Jasmine = React.createClass({
+  mixins: [ParseReact.Mixin, TimerMixin],
   getInitialState() {
     return {
       loggedIn: false,
       photos: []
     }
+  },
+
+  // observe(props, state) {
+  //   var userQuery= (new Parse.Query('User')).ascending('price');
+  //   return state.loggedIn ?  { listings: listingQuery } : null;
+  // },
+
+  componentWillMount() {
+    Parse.initialize("EvI5rKmppTeSEgJPxGQkIRV8Me5clIcwcZBwES8Z", "QOw8Kuma6j7dqo19mJOwvTbwDrp8D2g7zwS3P18k");
   },
 
   _setUser() {
@@ -45,7 +57,7 @@ var Jasmine = React.createClass({
       } else {
         this._parseFriendList(result);
       }
-    }, 'me/friends'); // ?fields=name,list_type
+    }, 'me/friends');
     return fetchCloseFriends;
   },
 
@@ -56,7 +68,7 @@ var Jasmine = React.createClass({
       } else {
         this._parseFeed(result);
       }
-    }, 'me/feed'); // ?fields=name,list_type
+    }, 'me/feed');
     return fetchMeFeed;
   },
 
@@ -67,7 +79,7 @@ var Jasmine = React.createClass({
       } else {
         this._parsePhotos(result);
       }
-    }, 'me/photos'); // ?fields=name,list_type
+    }, 'me/photos');
     return fetchMePhotos;
   },
 
@@ -76,7 +88,7 @@ var Jasmine = React.createClass({
       // Create a graph request asking for friends with a callback to handle the response.
       
 
-      FBSDKGraphRequestManager.batchRequests([this._fetchFriends(), this._fetchFeed(), this._fetchPhotos()], () => {}, 60);
+      FBSDKGraphRequestManager.batchRequests([this._fetchFriends()], () => {}, 60);
     }
     return (
       <View style={styles.container}>

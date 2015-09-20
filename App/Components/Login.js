@@ -2,13 +2,14 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 18:50:36
+* Last Modified time: 2015-09-19 21:48:16
 */
 'use strict';
 
 var React = require('react-native');
 
 var {
+  AsyncStorage,
   Text,
   StyleSheet,
   View
@@ -29,7 +30,7 @@ var {
 
 var Login = React.createClass({
 
-  render: function() {
+  render() {
     return (
       <View>
         <FBSDKLoginButton
@@ -40,7 +41,6 @@ var Login = React.createClass({
               if (result.isCanceled) {
                 alert('Login cancelled.');
               } else {
-                this.props.setUser();
                 FBSDKAccessToken.getCurrentAccessToken((token) => {
                   console.log(token.tokenString);
                 })
