@@ -20,5 +20,10 @@ indexed by UserID
 **contentInset** {top: number, left: number, bottom: number, right: number} 
 The amount by which the scroll view content is inset from the edges of the scroll view. Defaults to {0, 0, 0, 0}.
 
-### Swiper
->>>>>>> swiper-#7
+### cardData
+- friendName (name of person who posted/tagged in photo)
+- image (uri)
+    - know the aspect ratio of image (landscape or portrait)
+- 
+
+
