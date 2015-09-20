@@ -2,18 +2,21 @@ var React = require('react-native');
 var Parse = require('parse/react-native');
 var ParseReact = require('parse-react/react-native');
 var Dimensions = require('Dimensions');
+var Button = require('react-native-button');
 Parse.initialize("EvI5rKmppTeSEgJPxGQkIRV8Me5clIcwcZBwES8Z", "QOw8Kuma6j7dqo19mJOwvTbwDrp8D2g7zwS3P18k");
 
 var {
   Text,
   StyleSheet,
   View,
-  TouchableHighlight
+  TouchableHighlight,
+  PanResponder
 } = React;
 
 var {
   width
 } = Dimensions.get('window');
+var windowSize = Dimensions.get('window');
 
 var styles = StyleSheet.create({
     card: {
@@ -22,8 +25,15 @@ var styles = StyleSheet.create({
    		 borderColor: '#000',
    		 width: width,
    		 height: 300,
-   		 padding: 10
+		 marginTop: 200,
+   		 padding: 10,
+   		 marginRight: 10,
+   		 borderRadius: 10
  	},
+ 	button: {
+ 		borderColor: '#123',
+ 	}
+
 });
 
 var Card = React.createClass({ 
@@ -41,15 +51,14 @@ var Card = React.createClass({
 	},
 	resetPosition: function(e) {
 		console.log('reseting')
-	    var left = e.nativeEvent.pageX < (windowSize.width/2);
 	    this.setState({
-	      y: 300
+	      y: 0
 	    })
 	 },
 	setPosition: function(e) {
 		console.log('~~~~~~~~~~~~~~~~~~~~~~~~~setting position!!!!!!!!!!!!!!!!!!!!!!!!')
     	this.setState({
-    	  y: this.state.y + (e.nativeEvent.pageY - this.drag.y)
+			y: this.state.y + (e.nativeEvent.pageY + this.drag.y)
     	});
     	this.drag.y = e.nativeEvent.pageY;
 	},
@@ -62,6 +71,11 @@ var Card = React.createClass({
 		console.log(this.drag)
  		return true;
  	},
+ 	componentWillMount: function() {
+ 		this._panGesture = PanResponder.create({
+ 			 onPanResponderTerminationRequest: function () { return false }
+ 		})
+ 	},
 	render: function() {
 		return (
 			<View onResponderMove={this.setPosition}
@@ -70,6 +84,12 @@ var Card = React.createClass({
 					style={styles.card}>
 					<Text>{this.props.text}</Text>
 				    <Text>{this.props.user}</Text>
+				    <Button style={[styles.button,  {color: 'green'}]} onPress={this._handlePress}>
+				        Like!
+				      </Button>
+				      <Button style={[styles.button, {color: 'red'}]} onPress={this._handlePress}>
+				        Ignore
+				      </Button>
 			</View>
 		)
 	}
