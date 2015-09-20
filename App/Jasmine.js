@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-20 07:47:28
+* Last Modified time: 2015-09-20 08:56:18
 */
 'use strict';
 
@@ -43,9 +43,9 @@ var Jasmine = React.createClass({
     }
   },
 
-  observe() {
+  observe(props, state) {
     return {
-      user: ParseReact.currentUser
+      user: ParseReact.currentUser,
     }
   },
 
@@ -71,7 +71,7 @@ var Jasmine = React.createClass({
   },
 
   render() {
-    if (this.state.loggedIn) {
+    if (this.data.user) {
       // Create a graph request asking for friends with a callback to handle the response.
       FBSDKGraphRequestManager.batchRequests([this._fetchFriends(), this._fetchPhotos()], () => {}, 60);
     }
@@ -80,14 +80,14 @@ var Jasmine = React.createClass({
     }
     return (
       <View style={styles.container}>
-        { !this.state.loggedIn && <Login setUser={this._setUser} setLogout={this._setLogout}/> }
+        { <Login setUser={this._setUser} setLogout={this._setLogout}/> }
         { this.state.loggedIn &&  <CardStack cards={this._fetchCards()} fbID={this.state.fbID}/> }
       </View>
     );
   }, 
 
   _initParseUser(email, fbID) {
-    if (this.state.loggedIn && email) {
+    if (!this.data.user) {
       var userQuery = (new Parse.Query(Parse.User));
       userQuery.equalTo("email", email);
       userQuery.find({
@@ -121,22 +121,38 @@ var Jasmine = React.createClass({
 
   _fetchCards() {
     var cards = [];
-    this.setTimeout(() => {Parse.User.current().fetch().then((user) => {
-        var topFriends = user.get('topFriends');
-        for(var i=0; i < topFriends.length; i++) {
-          var friendQuery = Parse.Query("User");
-          friendQuery.equalTo("fbID", topFriends[i]);
+    Parse.User.current().fetch()
+      .then((user) => {
+        console.log(user);
+        var topFriends = Object.keys(user.get("topFriends"));
+        console.log(topFriends);
+        for (var i=0; i< topFriends.length; i++) {
+          console.log(topFriends[i]);
+          var friendQuery = new Parse.Query("User");
+          friendQuery.equalTo("fbID", '10153126850212997');
           friendQuery.find({
             success: function(friend) {
-              if(friend.length !==0) {
-                cards.push(friend.get("photo"));
-              }
+              console.log(friend);
+              cards.push(friend.get('photo'));
             }
-          });
+          })
         }
+        // friendQuery.containedIn("fbID", topFriends);
+        // friendQuery.find({
+        //   success: function(friends) {
+        //     console.log(friends);
+        //     if(friends.length !==0) {
+        //       _(friends).foreach((friend) => {
+        //         var f = Parse.Query(Parse.User);
+        //         f.
+        //         cards.push(friend.get('photo'));
+        //       });
+        //     }
+        //   }
+        // });
       })
-    }, 5000);
-    console.log(cards);
+      .done()
+    console.log('cards: ' + cards)
     return cards;
   },
 
@@ -196,7 +212,6 @@ var Jasmine = React.createClass({
           var email = this.state.email;
           Parse.User.logIn(email, 'password');
         }
-        console.log('fetching photos');
       }
     }, 'me/photos?fields=images');
     return fetchMePhotos;
@@ -216,7 +231,7 @@ var Jasmine = React.createClass({
     var imageSizes = (photos[0]["images"]);
     for(var j=0; j < imageSizes.length; j++) {
       if(imageSizes[j]["height"] < 540 && imageSizes[j]["height"] >= 426) {
-        imageSizes[j]["fbID"] = this.state.fbID;
+        imageSizes[j]["fbID"] = '10153126850212997';
         image = imageSizes[j];
       }
     }
