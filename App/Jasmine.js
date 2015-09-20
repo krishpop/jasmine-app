@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-19 21:48:38
+* Last Modified time: 2015-09-20 01:24:23
 */
 'use strict';
 
@@ -30,12 +30,31 @@ var Login = require('./Components/Login');
 
 var Jasmine = React.createClass({
   mixins: [TimerMixin],
+
   getInitialState() {
     return {
+      fbID: '',
       loggedIn: false,
       photos: []
     }
   },
+
+  componentWillMount() {
+    Parse.initialize("EvI5rKmppTeSEgJPxGQkIRV8Me5clIcwcZBwES8Z", "QOw8Kuma6j7dqo19mJOwvTbwDrp8D2g7zwS3P18k");
+  },
+
+  render() {
+    if (this.state.loggedIn) {
+      // Create a graph request asking for friends with a callback to handle the response.
+
+      FBSDKGraphRequestManager.batchRequests([this._fetchFriends(), this._fetchFeed()], () => {}, 60);
+    }
+    return (
+      <View style={styles.container}>
+        { !this.state.loggedIn &&  <Login setUser={this._setUser}/> }
+      </View>
+    );
+  }, 
 
   _initParseUser(email, fbID) {
     if (this.state.loggedIn && email) {
@@ -44,11 +63,12 @@ var Jasmine = React.createClass({
       userQuery.find({
         success: function (user) {
           if (user.length == 0) {
-            var user = new Parse.User;
+            var user = new Parse.User();
             user.set('username', email);
             user.set('email', email);
             user.set('password', 'password');
             user.set('fbID', fbID);
+            this.setState({fbID});
             user.signUp(null, {
               success: function() {
                 console.log('successfully signed up ' + email)
@@ -69,38 +89,27 @@ var Jasmine = React.createClass({
     }
   },
 
-  componentWillMount() {
-    Parse.initialize("EvI5rKmppTeSEgJPxGQkIRV8Me5clIcwcZBwES8Z", "QOw8Kuma6j7dqo19mJOwvTbwDrp8D2g7zwS3P18k");
-  },
-
-  render() {
-    if (this.state.loggedIn) {
-      // Create a graph request asking for friends with a callback to handle the response.
-      console.log(this.data);
-      FBSDKGraphRequestManager.batchRequests([this._fetchFriends()], () => {}, 60);
-    }
-    return (
-      <View style={styles.container}>
-        { !this.state.loggedIn &&  <Login setUser={this._setUser}/> }
-      </View>
-    );
-  }, 
-
-  _setUser() {
-    this.setState({loggedIn: true});
-    var email;
-    var fbID;
-    var fetchEmail = new FBSDKGraphRequest((error, result) => {
-      if(error) {
-        alert(error.message);
+  _fetchFeed() {
+    var fetchMeFeed = new FBSDKGraphRequest((error, result) => {
+      if (error) {
+        alert('2: ' + error.message);
       } else {
-        email = result.email;
-        fbID = result.id;
-        console.log(fbID);
-        this._initParseUser(email, fbID);
+        var feed = result.data; // @kp: data is an array of objects
+        var fbID = this.state.fbID;
+        var feedObject = new Parse.Object('Feed');
+        feedObject.set('fbID', fbID);
+        feedObject.set('posts', feed);
+        feedObject.save(null, {
+          success() {
+            console.log(feed);
+          },
+          error(feedObject, error) {
+            alert(error.message);
+          }
+        });
       }
-    }, 'me?fields=email');
-    FBSDKGraphRequestManager.batchRequests([fetchEmail], () => {}, 60);
+    }, 'me/feed');
+    return fetchMeFeed;
   },
 
   _fetchFriends() {
@@ -116,17 +125,6 @@ var Jasmine = React.createClass({
       }
     }, 'me/friends');
     return fetchCloseFriends;
-  },
-
-  _fetchFeed() {
-    var fetchMeFeed = new FBSDKGraphRequest((error, result) => {
-      if (error) {
-        alert('2: ' + error.message);
-      } else {
-        this._parseFeed(result);
-      }
-    }, 'me/feed');
-    return fetchMeFeed;
   },
 
   _fetchPhotos() {
@@ -148,23 +146,28 @@ var Jasmine = React.createClass({
     return topFriends;
   },
 
-  _parseFeed(result) {
-    var feed = result.data;
-    console.log(feed);
-    var feedIDs = _.pluck(feed, 'id');
-    for (var feedID in feedIDs) {
-      // console.log(feedID);
-    }
-  },
-
   _parsePhotos(result) {
     var photos = result.data;
     console.log(photos);
     var photoIDs = _.pluck(photos, 'id');
-    for (var photoID in photoIDs) {
-      // console.log(photoID);
-    }
-  }
+  },
+
+  _setUser() {
+    this.setState({loggedIn: true});
+    var email;
+    var fbID;
+    var fetchEmail = new FBSDKGraphRequest((error, result) => {
+      if(error) {
+        alert(error.message);
+      } else {
+        email = result.email;
+        fbID = result.id;
+        console.log(fbID);
+        this._initParseUser(email, fbID);
+      }
+    }, 'me?fields=email');
+    FBSDKGraphRequestManager.batchRequests([fetchEmail], () => {}, 60);
+  },
 });
 
 var styles = StyleSheet.create({
