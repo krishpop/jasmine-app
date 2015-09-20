@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-20 03:51:49
+* Last Modified time: 2015-09-20 04:15:45
 */
 'use strict';
 
@@ -195,7 +195,7 @@ var Jasmine = React.createClass({
       } else {
         email = result.email;
         fbID = result.id;
-        this.state.setState({email, fbID});
+        this.setState({email, fbID});
         AsyncStorage.setItem('@AsyncStorage:Jasmine:email', JSON.stringify(email));
         AsyncStorage.setItem('@AsyncStorage:Jasmine:loggedIn', JSON.stringify({loggedIn: this.state.loggedIn}));
         console.log(fbID);
@@ -211,7 +211,7 @@ var styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#202020',
   }
 });
 
