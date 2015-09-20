@@ -39,15 +39,15 @@
   <key>CFBundleURLTypes</key>
   <array>
     <dict>
-      <key>CFBundleURLSchemes</key>
-      <array>
-        <string>fb833518623436355</string>
-      </array>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>fb833518623436355</string>
+    </array>
     </dict>
   </array>
-  <key>FacebookAppID</key>
-  <string>833518623436355</string>
-  <key>FacebookDisplayName</key>
+    <key>FacebookAppID</key>
+    <string>833518623436355</string>
+    <key>FacebookDisplayName</key>
   <string>jasmine-app</string>
   <key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
