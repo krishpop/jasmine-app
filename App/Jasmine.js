@@ -29,7 +29,7 @@ var TimerMixin = require('react-timer-mixin');
 var Login = require('./Components/Login');
 
 var Jasmine = React.createClass({
-  mixins: [ParseReact.Mixin, TimerMixin],
+  mixins: [TimerMixin],
   getInitialState() {
     return {
       loggedIn: false,
@@ -37,17 +37,70 @@ var Jasmine = React.createClass({
     }
   },
 
-  // observe(props, state) {
-  //   var userQuery= (new Parse.Query('User')).ascending('price');
-  //   return state.loggedIn ?  { listings: listingQuery } : null;
-  // },
+  _initParseUser(email, fbID) {
+    if (this.state.loggedIn && email) {
+      var userQuery= (new Parse.Query(Parse.User));
+      userQuery.equalTo("email", email);
+      userQuery.find({
+        success: function (user) {
+          if (user.length == 0) {
+            var user = new Parse.User;
+            user.set('username', email);
+            user.set('email', email);
+            user.set('password', 'password');
+            user.set('fbID', fbID);
+            user.signUp(null, {
+              success: function() {
+                console.log('successfully signed up ' + email)
+              },
+              error: function(user, error) {
+                alert(error.message);
+              }
+            });
+          }
+          else {
+            Parse.User.logIn(email, "");
+          }
+        },
+        error: function(user, error) {
+          alert(error.message);
+        }
+      });
+    }
+  },
 
   componentWillMount() {
     Parse.initialize("EvI5rKmppTeSEgJPxGQkIRV8Me5clIcwcZBwES8Z", "QOw8Kuma6j7dqo19mJOwvTbwDrp8D2g7zwS3P18k");
   },
 
+  render() {
+    if (this.state.loggedIn) {
+      // Create a graph request asking for friends with a callback to handle the response.
+      console.log(this.data);
+      FBSDKGraphRequestManager.batchRequests([this._fetchFriends()], () => {}, 60);
+    }
+    return (
+      <View style={styles.container}>
+        { !this.state.loggedIn &&  <Login setUser={this._setUser}/> }
+      </View>
+    );
+  }, 
+
   _setUser() {
     this.setState({loggedIn: true});
+    var email;
+    var fbID;
+    var fetchEmail = new FBSDKGraphRequest((error, result) => {
+      if(error) {
+        alert(error.message);
+      } else {
+        email = result.email;
+        fbID = result.id;
+        console.log(fbID);
+        this._initParseUser(email, fbID);
+      }
+    }, 'me?fields=email');
+    FBSDKGraphRequestManager.batchRequests([fetchEmail], () => {}, 60);
   },
 
   _fetchFriends() {
@@ -55,7 +108,11 @@ var Jasmine = React.createClass({
       if (error) {
         alert('1: ' + error.message);
       } else {
-        this._parseFriendList(result);
+        var topFriends = this._parseFriendList(result);
+        var user = Parse.User.current();
+        console.log(user);
+        user.set("topFriends", topFriends);
+        user.save();
       }
     }, 'me/friends');
     return fetchCloseFriends;
@@ -83,27 +140,12 @@ var Jasmine = React.createClass({
     return fetchMePhotos;
   },
 
-  render() {
-    if (this.state.loggedIn) {
-      // Create a graph request asking for friends with a callback to handle the response.
-      
-
-      FBSDKGraphRequestManager.batchRequests([this._fetchFriends()], () => {}, 60);
-    }
-    return (
-      <View style={styles.container}>
-        { !this.state.loggedIn &&  <Login setUser={this._setUser}/> }
-      </View>
-    );
-  }, 
-
   _parseFriendList(result) {
     var friends = result.data;
-    console.log(friends);
     var friendIDs = _.pluck(friends, 'id');
-    for (var friendID in friendIDs) {
-      // console.log(friendID);
-    }
+    var friendNames = _.pluck(friends, 'name');
+    var topFriends = _.zipObject(friendIDs, friendNames);
+    return topFriends;
   },
 
   _parseFeed(result) {

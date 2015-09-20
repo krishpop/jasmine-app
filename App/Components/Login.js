@@ -41,9 +41,10 @@ var Login = React.createClass({
               if (result.isCanceled) {
                 alert('Login cancelled.');
               } else {
+                this.props.setUser();
                 FBSDKAccessToken.getCurrentAccessToken((token) => {
                   console.log(token.tokenString);
-                })
+                });
               }
             }
           }}
