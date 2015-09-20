@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-20 01:24:23
+* Last Modified time: 2015-09-20 03:51:49
 */
 'use strict';
 
@@ -27,12 +27,16 @@ var Parse = require('parse').Parse;
 var ParseReact = require('parse-react');
 var TimerMixin = require('react-timer-mixin');
 var Login = require('./Components/Login');
+var CardStack = require('./Components/CardStack');
+
+Parse.initialize("EvI5rKmppTeSEgJPxGQkIRV8Me5clIcwcZBwES8Z", "QOw8Kuma6j7dqo19mJOwvTbwDrp8D2g7zwS3P18k");
 
 var Jasmine = React.createClass({
   mixins: [TimerMixin],
 
   getInitialState() {
     return {
+      email: '',
       fbID: '',
       loggedIn: false,
       photos: []
@@ -40,18 +44,38 @@ var Jasmine = React.createClass({
   },
 
   componentWillMount() {
-    Parse.initialize("EvI5rKmppTeSEgJPxGQkIRV8Me5clIcwcZBwES8Z", "QOw8Kuma6j7dqo19mJOwvTbwDrp8D2g7zwS3P18k");
+  },
+
+  componentDidMount() {
+    var _this = this;
+    this.setTimeout(() => {AsyncStorage.getItem('@AsyncStorage:Jasmine:loggedIn')
+      .then((loginState) => {
+          loginState = JSON.parse(loginState);
+          _this.setState({loggedIn: loginState.loggedIn});
+        })
+      .then(() => {
+        AsyncStorage.getItem('@AsyncStorage:Jasmine:email')
+          .then((res) => {
+            email = JSON.parse(res);
+            _this.setState({email: res});
+          });
+        })
+      .done();
+    }, 500);
   },
 
   render() {
     if (this.state.loggedIn) {
       // Create a graph request asking for friends with a callback to handle the response.
-
       FBSDKGraphRequestManager.batchRequests([this._fetchFriends(), this._fetchFeed()], () => {}, 60);
+    }
+    else {
+
     }
     return (
       <View style={styles.container}>
-        { !this.state.loggedIn &&  <Login setUser={this._setUser}/> }
+        { !this.state.loggedIn &&  <Login setUser={this._setUser} setLogout={this._setLogout}/> }
+        { this.state.loggedIn &&  <CardStack/> }
       </View>
     );
   }, 
@@ -79,7 +103,7 @@ var Jasmine = React.createClass({
             });
           }
           else {
-            Parse.User.logIn(email, "");
+            Parse.User.logIn(email, 'password');
           }
         },
         error: function(user, error) {
@@ -119,9 +143,14 @@ var Jasmine = React.createClass({
       } else {
         var topFriends = this._parseFriendList(result);
         var user = Parse.User.current();
-        console.log(user);
-        user.set("topFriends", topFriends);
-        user.save();
+        if (user) {
+          user.set("topFriends", topFriends);
+          user.save();
+        }
+        else {
+          var email = this.state.email;
+          Parse.User.logIn(email, 'password');
+        }
       }
     }, 'me/friends');
     return fetchCloseFriends;
@@ -152,6 +181,10 @@ var Jasmine = React.createClass({
     var photoIDs = _.pluck(photos, 'id');
   },
 
+  _setLogout() {
+    this.setState({loggedIn: false, email: ''});
+  },
+
   _setUser() {
     this.setState({loggedIn: true});
     var email;
@@ -162,6 +195,9 @@ var Jasmine = React.createClass({
       } else {
         email = result.email;
         fbID = result.id;
+        this.state.setState({email, fbID});
+        AsyncStorage.setItem('@AsyncStorage:Jasmine:email', JSON.stringify(email));
+        AsyncStorage.setItem('@AsyncStorage:Jasmine:loggedIn', JSON.stringify({loggedIn: this.state.loggedIn}));
         console.log(fbID);
         this._initParseUser(email, fbID);
       }
