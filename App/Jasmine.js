@@ -67,14 +67,14 @@ var Jasmine = React.createClass({
   render() {
     if (this.state.loggedIn) {
       // Create a graph request asking for friends with a callback to handle the response.
-      FBSDKGraphRequestManager.batchRequests([this._fetchFriends(), this._fetchFeed()], () => {}, 60);
+      FBSDKGraphRequestManager.batchRequests([this._fetchFriends(), this._fetchPhotos()], () => {}, 60);
     }
     else {
 
     }
     return (
       <View style={styles.container}>
-        { !this.state.loggedIn &&  <Login setUser={this._setUser} setLogout={this._setLogout}/> }
+        { <Login setUser={this._setUser} setLogout={this._setLogout}/> }
         { this.state.loggedIn &&  <CardStack/> }
       </View>
     );
@@ -113,6 +113,26 @@ var Jasmine = React.createClass({
     }
   },
 
+  _fetchCards() {
+    var user = Parse.User.current();
+    if(user){ 
+      var topFriends = user.get("topFriends");
+      var cards = [];
+      for(var i=0; i < topFriends.length; i++) {
+        var friendQuery = Parse.Query("User");
+        friendQuery.equalTo("fbID", topFriends[i]);
+        friendQuery.find({
+          success: function(friend) {
+            if(friend.length !==0) {
+              cards.push(friend.get("photo"));
+            }
+          }
+        });
+      }
+    }
+    return cards;
+  },
+
   _fetchFeed() {
     var fetchMeFeed = new FBSDKGraphRequest((error, result) => {
       if (error) {
@@ -143,6 +163,7 @@ var Jasmine = React.createClass({
       } else {
         var topFriends = this._parseFriendList(result);
         var user = Parse.User.current();
+        alert("found user");
         if (user) {
           user.set("topFriends", topFriends);
           user.save();
@@ -156,14 +177,21 @@ var Jasmine = React.createClass({
     return fetchCloseFriends;
   },
 
-  _fetchPhotos() {
+   _fetchPhotos() {
     var fetchMePhotos = new FBSDKGraphRequest((error, result) => {
+      // console.log('fetching photos');
       if (error) {
         alert('3: ' + error.message);
       } else {
-        this._parsePhotos(result);
+        var photo = this._parsePhotos(result);
+        var user = Parse.User.current();
+        if(user) {
+          user.set("photo", photo);
+          user.save();
+        }
+        console.log('fetching photos');
       }
-    }, 'me/photos');
+    }, 'me/photos?fields=images');
     return fetchMePhotos;
   },
 
@@ -177,12 +205,22 @@ var Jasmine = React.createClass({
 
   _parsePhotos(result) {
     var photos = result.data;
-    console.log(photos);
-    var photoIDs = _.pluck(photos, 'id');
+    var image = {};
+    var imageSizes = (photos[0]["images"]);
+    for(var j=0; j < imageSizes.length; j++) {
+      if(imageSizes[j]["height"] < 540 && imageSizes[j]["height"] >= 426) {
+        imageSizes[j]["fbID"] = this.state.fbID;
+        image = imageSizes[j];
+      }
+    }
+    return image;
   },
 
   _setLogout() {
     this.setState({loggedIn: false, email: ''});
+    Parse.User.logOut();
+    AsyncStorage.setItem('@AsyncStorage:Jasmine:email', '');
+    AsyncStorage.setItem('@AsyncStorage:Jasmine:loggedIn', JSON.stringify({loggedIn: false}));
   },
 
   _setUser() {
@@ -195,7 +233,8 @@ var Jasmine = React.createClass({
       } else {
         email = result.email;
         fbID = result.id;
-        this.state.setState({email, fbID});
+        this.setState({email: email});
+        this.setState({fbID: fbID});
         AsyncStorage.setItem('@AsyncStorage:Jasmine:email', JSON.stringify(email));
         AsyncStorage.setItem('@AsyncStorage:Jasmine:loggedIn', JSON.stringify({loggedIn: this.state.loggedIn}));
         console.log(fbID);
