@@ -2,7 +2,7 @@
 * Author: Krishnan
 * Date:   2015-09-19 03:06:29
 * Last Modified by:   Krishnan
-* Last Modified time: 2015-09-20 04:15:45
+* Last Modified time: 2015-09-21 13:35:33
 */
 'use strict';
 
@@ -23,8 +23,8 @@ var {
 } = FBSDKCore;
 
 var _ = require('lodash');
-var Parse = require('parse').Parse;
-var ParseReact = require('parse-react');
+var Parse = require('parse/react-native');
+var ParseReact = require('parse-react/react-native');
 var TimerMixin = require('react-timer-mixin');
 var Login = require('./Components/Login');
 var CardStack = require('./Components/CardStack');
@@ -32,7 +32,7 @@ var CardStack = require('./Components/CardStack');
 Parse.initialize("EvI5rKmppTeSEgJPxGQkIRV8Me5clIcwcZBwES8Z", "QOw8Kuma6j7dqo19mJOwvTbwDrp8D2g7zwS3P18k");
 
 var Jasmine = React.createClass({
-  mixins: [TimerMixin],
+  mixins: [ParseReact.mixin, TimerMixin],
 
   getInitialState() {
     return {
@@ -40,6 +40,12 @@ var Jasmine = React.createClass({
       fbID: '',
       loggedIn: false,
       photos: []
+    }
+  },
+
+  observe() {
+    return {
+      user: ReactParse.currentUser
     }
   },
 
@@ -140,16 +146,19 @@ var Jasmine = React.createClass({
     var fetchCloseFriends = new FBSDKGraphRequest((error, result) => {
       if (error) {
         alert('1: ' + error.message);
-      } else {
+      } 
+      else {
         var topFriends = this._parseFriendList(result);
-        var user = Parse.User.current();
+        if (!this.data.user) {
+          Parse.User.logIn(this.state.email, 'password');
+        }  
+        user = Parse.User.current();
         if (user) {
           user.set("topFriends", topFriends);
           user.save();
         }
         else {
-          var email = this.state.email;
-          Parse.User.logIn(email, 'password');
+          alert('Could not find user');
         }
       }
     }, 'me/friends');
